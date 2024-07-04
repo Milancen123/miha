@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+    <link rel="stylesheet" href="/styles.css">
+    <style>
+        /* styles.css */
+
+/* General styles */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+    margin: 0;
+    padding: 0;
+}
+
+.admin-panel {
+    max-width: 800px;
+    margin: 20px auto;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+button {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-right: 10px;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+.table-container {
+    margin-top: 20px;
+}
+
+/* Table styles */
+.driver-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.driver-table th, .driver-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.driver-table th {
+    background-color: #007bff;
+    color: #fff;
+}
+
+.driver-table td {
+    vertical-align: middle;
+}
+
+.driver-table .actions button {
+    padding: 8px 12px;
+    margin-right: 5px;
+    background-color: #28a745;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.driver-table .actions button.delete {
+    background-color: #dc3545;
+}
+
+.driver-table .actions button:hover {
+    background-color: #218838;
+}
+
+/* Form popup styles */
+.form-popup {
+    display: none;
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+}
+
+.form-container {
+    max-width: 400px;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+.form-container h2 {
+    margin-bottom: 20px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    font-weight: bold;
+}
+
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.form-button {
+    text-align: right;
+    margin-top: 20px;
+}
+
+.form-button button {
+    padding: 10px 20px;
+    background-color: #28a745;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.form-button button:hover {
+    background-color: #218838;
+}
+
+.close-icon {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 20px;
+    cursor: pointer;
+    color: #aaa;
+}
+
+.close-icon:hover {
+    color: #555;
+}
+
+    </style>
+</head>
+<body>
+    <div class="admin-panel">
+        <h1>Admin Panel</h1>
+        <button onclick="openForm()">Dodaj novog vozača</button>
+        <button onclick="logout()">Odjava</button>
+        <table class="driver-table" id="driver-list">
+            <thead>
+                <tr>
+                    <th><input type="checkbox" id="select-all"></th>
+                    <th>Ime</th>
+                    <th>Prezime</th>
+                    <th>Model auta</th>
+                    <th>Email</th>
+                    <th>Lozinka</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Table rows will be dynamically populated -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Popup form for adding a new driver -->
+    <div class="form-popup" id="addDriverForm">
+        <div class="form-container">
+            <span class="close-icon" onclick="closeForm()">×</span>
+            <h2>Dodaj Novog Vozača</h2>
+            <form id="driverForm" action="/api/admin/drivers" method="POST">
+                <div class="form-group">
+                    <label for="first_name">Ime</label>
+                    <input type="text" id="first_name" name="first_name" required>
+                </div>
+                <div class="form-group">
+                    <label for="last_name">Prezime</label>
+                    <input type="text" id="last_name" name="last_name" required>
+                </div>
+                <div class="form-group">
+                    <label for="car_model">Model Auta</label>
+                    <input type="text" id="car_model" name="car_model" required>
+                </div>
+                <div class="form-group">
+                    <label for="bank_acc">Broj Bankovnog Računa</label>
+                    <input type="text" id="bank_acc" name="bank_acc" required>
+                </div>
+                <div class="form-group">
+                    <label for="plate_number">Registarski Broj</label>
+                    <input type="text" id="plate_number" name="plate_number" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Šifra</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <div class="form-button">
+                    <button onClick="createDriver" type="submit">Dodaj</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Fetch data on page load
+document.addEventListener('DOMContentLoaded', async () => {
+    await fetchData();
+});
+
+document.getElementById('driverForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            // Gather form data
+            const token = localStorage.getItem('authToken'); // Retrieve the token from localStorage
+            const formData = new FormData(event.target);
+            const formEntries = Object.fromEntries(formData.entries());
+            const jsonData = JSON.stringify(formEntries);
+
+            console.log('Form Data:', formEntries);
+
+            // Submit form using fetch API with JSON data
+            fetch('/api/admin/drivers', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}` // Add the Authorization header with the token
+                },
+                body: jsonData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        console.log(data);
+                        showError(data.message);
+                    }
+                })
+                .catch((error) => {
+
+                    showError(error);
+                });
+        });
+
+
+
+// Function to fetch data from the server
+async function fetchData() {
+    try {
+        const response = await fetch('/api/admin/drivers', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+
+        const data = await response.json();
+        localStorage.setItem('registrations', JSON.stringify(data));
+        loadTableData(data);
+    } catch (error) {
+        console.error('Error fetching data:', error);
+    }
+}
+
+
+// Function to populate the table with fetched data
+function loadTableData(data) {
+    const tableBody = document.querySelector('#driver-list tbody');
+    tableBody.innerHTML = '';
+
+    data.forEach(driver => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td><input type="checkbox" class="row-select"></td>
+            <td>${driver.first_name}</td>
+            <td>${driver.last_name}</td>
+            <td>${driver.car_model}</td>
+            <td>${driver.email}</td>
+            <td>${driver.password}</td>
+            <td class="actions">
+                <button class="accept" onclick="prihvatiPrijavu(event)">Prihvati prijavu</button>
+                <button class="delete" onclick="otkaziPrijavu(event)">Odbij prijavu</button>
+            </td>
+        `;
+        tableBody.appendChild(row);
+    });
+}
+function prihvatiPrijavu(event) {
+            const token = localStorage.getItem('authToken'); // Retrieve the token from localStorage
+            const row = event.target.closest('tr'); // Get the closest parent <tr> element
+            const email = row.querySelector('td:nth-child(5)').textContent.trim(); // Get the email from the fifth <td> element (index 4)
+            const dataToSend = {
+                email: email
+            };
+            console.log(dataToSend);
+            if (email) {
+                //fetch
+                fetch('/api/admin/drivers', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}` // Add the Authorization header with the token
+                    
+                    },
+                    body: JSON.stringify(dataToSend)
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json(); // Assuming response is JSON; adjust as per your API
+                    })
+                    .then(data => {
+                        row.remove();
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        // Handle errors, show error messages, etc.
+                        showError(error);
+                    });
+            }
+            //pronadji ga u localStorage-u
+            // Perform other actions with the email variable as needed
+        }
+        function otkaziPrijavu(event) {
+            const token = localStorage.getItem('authToken'); // Retrieve the token from localStorage
+            const row = event.target.closest('tr'); // Get the closest parent <tr> element
+            const email = row.querySelector('td:nth-child(5)').textContent.trim(); // Get the email from the fifth <td> element (index 4)
+            const dataToSend = {
+                email: email
+            };
+            if (email) {
+                //fetch
+                fetch('/api/admin/drivers', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}` // Add the Authorization header with the token
+                    },
+                    body: JSON.stringify(dataToSend)
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json(); // Assuming response is JSON; adjust as per your API
+                    })
+                    .then(data => {
+                        row.remove();
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        // Handle errors, show error messages, etc.
+                        showError(error)
+                    });
+            }
+        }
+
+
+// Function to open the form for adding a new driver
+function openForm() {
+    document.getElementById('addDriverForm').style.display = 'block';
+}
+
+// Function to close the form
+function closeForm() {
+    document.getElementById('addDriverForm').style.display = 'none';
+}
+
+// Function to handle logout
+function logout() {
+    // Implement logout logic here
+    localStorage.removeItem("authToken");
+    window.location.href = 'http://localhost:5000/api/admin/';
+}
+
+    </script>
+</body>
+</html>
